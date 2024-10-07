@@ -33,13 +33,13 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   ThemeMode _themeMode = FlutterFlowTheme.themeMode;
+
   late AppStateNotifier _appStateNotifier;
   late GoRouter _router;
+
   late Stream<BaseAuthUser> userStream;
 
   final authUserSub = authenticatedUserStream.listen((_) {});
-
-  bool _isLoading = true; // Added a loading state
 
   @override
   void initState() {
@@ -50,9 +50,6 @@ class _MyAppState extends State<MyApp> {
     userStream = todoFirebaseUserStream()
       ..listen((user) {
         _appStateNotifier.update(user);
-        setState(() {
-          _isLoading = false; // Stop loading when user data is available
-        });
       });
     jwtTokenStream.listen((_) {});
     Future.delayed(
@@ -64,6 +61,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void dispose() {
     authUserSub.cancel();
+
     super.dispose();
   }
 
@@ -74,32 +72,24 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        MaterialApp.router(
-          title: 'Todo',
-          localizationsDelegates: const [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [Locale('en', ''), Locale('es', '')],
-          theme: ThemeData(
-            brightness: Brightness.light,
-            useMaterial3: false,
-          ),
-          darkTheme: ThemeData(
-            brightness: Brightness.dark,
-            useMaterial3: false,
-          ),
-          themeMode: _themeMode,
-          routerConfig: _router,
-        ),
-        if (_isLoading)
-          const Center(
-            child: CircularProgressIndicator(), // Loading indicator
-          ),
+    return MaterialApp.router(
+      title: 'Todo',
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
       ],
+      supportedLocales: const [Locale('en', '')],
+      theme: ThemeData(
+        brightness: Brightness.light,
+        useMaterial3: false,
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        useMaterial3: false,
+      ),
+      themeMode: _themeMode,
+      routerConfig: _router,
     );
   }
 }
